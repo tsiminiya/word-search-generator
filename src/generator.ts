@@ -84,11 +84,11 @@ export function generate(options?: Options): WordSearch {
     let dxs: number[];
     let dys: number[];
     if (diagonals) {
-        dxs = [0, 1, 1, 1, 0, -1, -1, -1];
-        dys = [-1, -1, 0, 1, 1, 1, 0, -1];
+        dxs = [1, 1, 0];
+        dys = [0, 1, 1];
     } else {
-        dxs = [0, 1, 0, -1];
-        dys = [-1, 0, 1, 0];
+        dxs = [1, 0];
+        dys = [0, 1];
     }
 
     function rand(max: number) {

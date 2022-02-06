@@ -67,12 +67,12 @@ function generate(options) {
     var dxs;
     var dys;
     if (diagonals) {
-        dxs = [0, 1, 1, 1, 0, -1, -1, -1];
-        dys = [-1, -1, 0, 1, 1, 1, 0, -1];
+        dxs = [1, 1, 0];
+        dys = [0, 1, 1];
     }
     else {
-        dxs = [0, 1, 0, -1];
-        dys = [-1, 0, 1, 0];
+        dxs = [1, 0];
+        dys = [0, 1];
     }
     function rand(max) {
         return Math.floor(Math.random() * max);

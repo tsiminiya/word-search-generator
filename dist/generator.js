@@ -1,12 +1,20 @@
 "use strict";
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 exports.__esModule = true;
 exports.generate = void 0;
 var WordSearch = /** @class */ (function () {
-    function WordSearch(width, height, grid, words) {
+    function WordSearch(width, height, grid, words, precopy) {
         this.width = width;
         this.height = height;
         this.grid = grid;
         this.words = words;
+        this.precopy = precopy;
     }
     WordSearch.prototype.get = function (x, y) {
         return this.grid[y * this.width + x];
@@ -16,6 +24,16 @@ var WordSearch = /** @class */ (function () {
         for (var y = 0; y < this.height; y++) {
             for (var x = 0; x < this.width; x++) {
                 result += this.get(x, y) + ' ';
+            }
+            result += '\n';
+        }
+        return result;
+    };
+    WordSearch.prototype.printPrecopy = function () {
+        var result = '';
+        for (var y = 0; y < this.height; y++) {
+            for (var x = 0; x < this.width; x++) {
+                result += this.precopy[y * this.width + x] + ' ';
             }
             result += '\n';
         }
@@ -58,6 +76,7 @@ function generate(options) {
     // console.info(`maximum word length: ${options.maxLength}`);
     // console.info(`effort: ${effort}`);
     var width = options.width, height = options.height, diagonals = options.diagonals;
+    var firstWord = true;
     var grid = [];
     var used = [];
     var usedMap = {};
@@ -85,6 +104,7 @@ function generate(options) {
     }
     function tryword(x, y, dx, dy, word) {
         var ok = false;
+        var intersected = false;
         for (var i = 0; i < word.length; i++) {
             var l = word[i].toUpperCase();
             if (x < 0 || y < 0 || x >= width || y >= height)
@@ -94,10 +114,12 @@ function generate(options) {
                 return false;
             if (cur == ' ')
                 ok = true;
+            if (cur == l)
+                intersected = true;
             x += dx;
             y += dy;
         }
-        return ok;
+        return ok && (intersected || firstWord);
     }
     function putword(x, y, dx, dy, word) {
         for (var i = 0; i < word.length; i++) {
@@ -120,10 +142,13 @@ function generate(options) {
         var d = rand(dxs.length);
         var dx = dxs[d];
         var dy = dys[d];
-        if (tryword(x, y, dx, dy, word))
+        if (tryword(x, y, dx, dy, word)) {
             putword(x, y, dx, dy, word);
+            firstWord = false;
+        }
     }
     //const fillage = grid.reduce((t, c) => t + (c == ' ' ? 0 : 1), 0);
+    var precopy = __spreadArrays(grid);
     for (var i = 0; i < grid.length; i++) {
         if (grid[i] == ' ')
             grid[i] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[rand(26)];
@@ -133,6 +158,6 @@ function generate(options) {
     //console.info(`${fillage}/${width * height} filled (${(fillage*100/width/height).toFixed(1)}%)`);
     //print();
     //console.info(used.join(','));
-    return new WordSearch(width, height, grid, used);
+    return new WordSearch(width, height, grid, used, precopy);
 }
 exports.generate = generate;

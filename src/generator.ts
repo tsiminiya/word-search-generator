@@ -12,12 +12,14 @@ class WordSearch {
     readonly height: number;
     readonly grid: string[];
     readonly words: string[];
+    readonly precopy: string[];
 
-    constructor(width: number, height: number, grid: string[], words: string[]) {
+    constructor(width: number, height: number, grid: string[], words: string[], precopy: string[]) {
         this.width = width;
         this.height = height;
         this.grid = grid;
         this.words = words;
+        this.precopy = precopy;
     }
 
     get(x: number, y: number) {
@@ -29,6 +31,17 @@ class WordSearch {
         for (let y = 0; y < this.height; y ++) {
             for (let x = 0; x < this.width; x ++) {
                 result += this.get(x, y) + ' ';
+            }
+            result += '\n';
+        }
+        return result;
+    }
+
+    printPrecopy() {
+        let result = '';
+        for (let y = 0; y < this.height; y ++) {
+            for (let x = 0; x < this.width; x ++) {
+                result += this.precopy[y * this.width + x] + ' ';
             }
             result += '\n';
         }
@@ -73,6 +86,7 @@ export function generate(options?: Options): WordSearch {
     // console.info(`effort: ${effort}`);
 
     let {width, height, diagonals} = options;
+    let firstWord = true;
 
     let grid: string[] = [];
     let used: string[] = [];
@@ -105,6 +119,7 @@ export function generate(options?: Options): WordSearch {
 
     function tryword(x: number, y: number, dx: number, dy: number, word: string) {
         let ok = false;
+        let intersected = false;
         for (let i = 0; i < word.length; i ++) {
             const l = word[i].toUpperCase();
             if (x < 0 || y < 0 || x >= width || y >= height)
@@ -114,10 +129,12 @@ export function generate(options?: Options): WordSearch {
                 return false;
             if (cur == ' ')
                 ok = true;
+            if (cur == l)
+                intersected = true
             x += dx;
             y += dy;
         }
-        return ok;
+        return ok && (intersected || firstWord);
     }
 
     function putword(x: number, y: number, dx: number, dy: number, word: string) {
@@ -142,11 +159,15 @@ export function generate(options?: Options): WordSearch {
         const d = rand(dxs.length);
         const dx = dxs[d];
         const dy = dys[d];
-        if (tryword(x, y, dx, dy, word))
+        if (tryword(x, y, dx, dy, word)) {
             putword(x, y, dx, dy, word);
+            firstWord = false;
+        }
     }
 
     //const fillage = grid.reduce((t, c) => t + (c == ' ' ? 0 : 1), 0);
+
+    const precopy = [...grid];
 
     for (let i = 0; i < grid.length; i ++) {
         if (grid[i] == ' ')
@@ -160,5 +181,5 @@ export function generate(options?: Options): WordSearch {
     //print();
     //console.info(used.join(','));
 
-    return new WordSearch(width, height, grid, used);
+    return new WordSearch(width, height, grid, used, precopy);
 }
